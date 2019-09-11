@@ -1,9 +1,30 @@
 .Cell {
-  height: 100px;
-  width: 100px;
-  background-color: darkgray;
+    height: 0%;
+    background-color: darkgray;
+    border-radius: 1px;
+    transition: 0.5s ease;
+}
+
+.Board {
+    width: 40vw;
 }
 
 .Cell-lit {
   background-color: white;
+}
+
+@media only screen and (max-width: 1000px) {
+    .Board {
+        width: 55vw;
+    }
+}
+@media only screen and (max-width: 750px) {
+    .Board {
+        width: 75vw;
+    }
+}
+@media only screen and (max-width: 500px) {
+    .Board {
+        width: 100vw;
+    }
 }

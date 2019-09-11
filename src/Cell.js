@@ -22,15 +22,25 @@ class Cell extends Component {
   }
 
   handleClick(evt) {
-    // call up to the board to flip cells around this cell
-    this.props.flipCellsAroundMe(evt.target.getAttribute('pos'));
+    // call up to the Board to flip the cell and cells around this cell
+    this.props.handleCellClick(evt.target.getAttribute('pos'));
   }
 
   render() {
     let classes = "Cell" + (this.props.isLit ? " Cell-lit" : "");
+    let computedWidth = Math.floor(100 / this.props.width)
+    let styles = {
+        width: `${computedWidth}%`,
+        paddingBottom: `${computedWidth}%`
+    }
 
     return (
-        <td className={classes} onClick={this.handleClick} pos={this.props.pos} />
+        <td 
+        className={classes} 
+        style={styles}
+        onClick={this.handleClick} 
+        pos={this.props.pos} 
+        />
     )
   }
 }

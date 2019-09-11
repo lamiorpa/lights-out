@@ -40,52 +40,48 @@ class Board extends Component {
     static defaultProps = {
         nrows: 4,
         ncols: 4,
-        initializationRepeats: 5,
-        chanceLightStartsOn: 0.25
+        initializationRepeats: 5
     };
 
     constructor(props) {
         super(props);
 
         this.state = {
-            board: this.constructBoard(this.props.nrows, this.props.ncols, this.props.chanceLightStartsOn),
+            board: this.constructBoard(this.props.nrows, this.props.ncols),
             clicks: 0,
             hasWon: false
         };
-        //this.handleCellClick = this.handleCellClick.bind(this);
-        this.flipCellsAround = this.flipCellsAround.bind(this);
-        this.setBoard = this.setBoard.bind(this);
+        this.handleCellClick = this.handleCellClick.bind(this);
     }
 
     // Suoritetaan constructorin toimien jälkeen boardin asettelu, ennen itse sisällön renderöimistä
     // https://reactjs.org/docs/react-component.html
     componentDidMount() {
-        this.setBoard(this.props.initializationRepeats);
+        this.setBoard();
+    }
+
+    componentWillUnmount() {
+        console.log("tuhotaan")
     }
 
 
     setBoardStage(number) {
+        let coords = []
 
         let i = 0;
         do {
             let coord = `${getRandomInt(this.props.ncols)}-${getRandomInt(this.props.nrows)}`;
+            coords.push(coord);
             this.flipCellsAround(coord);
             i++;
         } while (i < number);
+
+        console.log(coords);
     }
 
     /** create a board nrows high/ncols wide, each cell randomly lit or unlit */
 
     constructBoard(nrows, ncols) {
-
-        // let board = [];
-        // for (let i = 0; i < nrows; i++) {
-        //     let row = [];
-        //     for (let o = 0; o < ncols; o++) {
-        //         row.push(Math.random() > chanceLightStartsOn ? false : true);
-        //     }
-        //     board.push(row);
-        // }
 
         let board = [];
         for (let i = 0; i < nrows; i++) {
@@ -95,11 +91,8 @@ class Board extends Component {
             }
             board.push(row);
         }
-
         return board
     }
-
-    /** handle changing a cell: update board & determine if winner */
 
     /**
      * Handles changing of cells to opposites
@@ -130,7 +123,7 @@ class Board extends Component {
             let sArray = [top, bottom, right, left];
 
             for (let i of sArray) {
-                // if the surrounding coord os in the board, flip it
+                // if the surrounding coord is in the board, flip it
                 if (i[1] >= 0 && i[1] < ncols && i[0] >= 0 && i[0] < nrows) {
                     board[i[0]][i[1]] = !board[i[0]][i[1]];
                 }
@@ -159,7 +152,7 @@ class Board extends Component {
         }
 
         // win when every cell is turned off
-        // TODO: determine is the game has been won
+        // TODO: determine if the game has been won
 
         this.setState({
             board: board,
@@ -169,10 +162,20 @@ class Board extends Component {
     }
 
     /**
-     * @param {number} repeats (number of clicks pre-made before player interaction)
+     * @param {number} repeats (number of pre-made clicks before player interaction)
      */
     setBoard(repeats = 5) {
+        console.log(typeof(repeats))
         this.setBoardStage(repeats);
+    }
+
+    handleCellClick(coord) {
+        this.flipCellsAround(coord);
+        this.setState(state => {
+            return {
+                clicks: state.clicks + 1
+            }
+        })
     }
 
     /** Render game board or winning message. */
@@ -180,30 +183,35 @@ class Board extends Component {
     render() {
         return (
             <div>
-                <h1>Lights out</h1>
                 {this.state.hasWon ?
-                    <h2>Hih hih, voitit pelin <button onClick={this.setBoard}>Reset</button>
+                    <h2>Hih hih, voitit pelin <button onClick={() => this.setBoard(5)}>Reset</button>
                     </h2>
                     :
-                    <table className="Board">
-                        <tbody>
-                            {this.state.board.map((i, yindex) => {
-                                let trid = `tr${yindex}`
-                                return <tr key={trid}>
-                                    {i.map((u, xindex) => {
-                                        let coord = `${yindex}-${xindex}`;
-                                        return <Cell
-                                            key={coord}
-                                            pos={coord}
-                                            isLit={u}
-                                            flipCellsAroundMe={this.flipCellsAround}
-                                        />
-                                    })}
-                                </tr>
-                            })}
-                        </tbody>
-                    </table>
+                    <React.Fragment>
+                        <h1>Lights out - {this.props.nrows + "x" + this.props.ncols}</h1>
+                        <table className="Board">
+                            <tbody>
+                                {this.state.board.map((yitem, yindex) => {
+                                    let trid = `tr${yindex}`
+                                    return <tr key={trid}>
+                                        {yitem.map((xitem, xindex) => {
+                                            let coord = `${yindex}-${xindex}`;
+                                            return <Cell
+                                                key={coord}
+                                                pos={coord}
+                                                isLit={xitem}
+                                                width={this.props.ncols}
+                                                height={this.props.nrows}
+                                                handleCellClick={this.handleCellClick}
+                                            />
+                                        })}
+                                    </tr>
+                                })}
+                            </tbody>
+                        </table>
+                    </React.Fragment>
                 }
+
             </div>
         );
 
