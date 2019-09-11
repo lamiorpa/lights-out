@@ -21,7 +21,7 @@ function getRandomInt(max) {
  *
  *    For this board:
  *       .  .  .
- *       O  O  .     (where . is off, and O is on)
+ *       O  O  .     (where . is off (false), and O is on(true))
  *       .  .  .
  *
  *    This would be: [[f, f, f], [t, t, f], [f, f, f]]
@@ -49,8 +49,10 @@ class Board extends Component {
 
         this.state = {
             board: this.constructBoard(this.props.nrows, this.props.ncols, this.props.chanceLightStartsOn),
+            clicks: 0,
             hasWon: false
         };
+        this.handleCellClick = this.handleCellClick.bind(this);
         this.flipCellsAround = this.flipCellsAround.bind(this);
         this.setBoard = this.setBoard.bind(this);
     }
@@ -60,10 +62,11 @@ class Board extends Component {
     componentDidMount() {
         this.setBoard(this.props.initializationRepeats);
     }
-    
+
+
     setBoardStage(number) {
-        
-        let i = 0; 
+
+        let i = 0;
         do {
             let coord = `${getRandomInt(this.props.ncols)}-${getRandomInt(this.props.nrows)}`;
             this.flipCellsAround(coord);
@@ -73,7 +76,7 @@ class Board extends Component {
 
     /** create a board nrows high/ncols wide, each cell randomly lit or unlit */
 
-    constructBoard(nrows, ncols, chanceLightStartsOn) {
+    constructBoard(nrows, ncols) {
 
         // let board = [];
         // for (let i = 0; i < nrows; i++) {
@@ -91,15 +94,21 @@ class Board extends Component {
                 row.push(false);
             }
             board.push(row);
-        }  
+        }
 
         return board
     }
 
     /** handle changing a cell: update board & determine if winner */
 
+    /**
+     * Handles changing of cells to opposites
+     * Determines if the board has been cleared (Victory)
+     * Updates the board
+     * @param {string} coord (e.g. "2-3", "0-1") 
+     */
     flipCellsAround(coord) {
-        
+
         let { ncols, nrows } = this.props;
         // let ncols = this.props.ncols;
         // let nrows = this.props.nrows;
@@ -121,11 +130,13 @@ class Board extends Component {
             let sArray = [top, bottom, right, left];
 
             for (let i of sArray) {
+                // if the surrounding coord os in the board, flip it
                 if (i[1] >= 0 && i[1] < ncols && i[0] >= 0 && i[0] < nrows) {
                     board[i[0]][i[1]] = !board[i[0]][i[1]];
                 }
             }
         }
+
         flipCell(y, x);
         flipCellSurroundings(y, x);
 
@@ -141,7 +152,7 @@ class Board extends Component {
 
             for (let i of board) {
                 for (let u of i) {
-                    if (u === true) { return false};
+                    if (u === true) { return false };
                 }
             }
             return true;
@@ -157,8 +168,11 @@ class Board extends Component {
 
     }
 
-    setBoard() {
-        this.setBoardStage(5);
+    /**
+     * @param {number} repeats (number of clicks pre-made before player interaction)
+     */
+    setBoard(repeats = 5) {
+        this.setBoardStage(repeats);
     }
 
     /** Render game board or winning message. */
@@ -167,28 +181,28 @@ class Board extends Component {
         return (
             <div>
                 <h1>Lights out</h1>
-                {this.state.hasWon ? 
-                <h2>Hih hih, voitit pelin <button onClick={this.setBoard}>Reset</button>
-                </h2>
-                :
-                <table className="Board">
-                    <tbody>
-                        {this.state.board.map((i, yindex) => {
-                            let trid = `tr${yindex}`
-                            return <tr key={trid}>
-                                {i.map((u, xindex) => {
-                                    let coord = `${yindex}-${xindex}`;
-                                    return <Cell
-                                        key={coord}
-                                        pos={coord}
-                                        isLit={u}
-                                        flipCellsAroundMe={this.flipCellsAround}
-                                    />
-                                })}
-                            </tr>
-                        })}
-                    </tbody>
-                </table>
+                {this.state.hasWon ?
+                    <h2>Hih hih, voitit pelin <button onClick={this.setBoard}>Reset</button>
+                    </h2>
+                    :
+                    <table className="Board">
+                        <tbody>
+                            {this.state.board.map((i, yindex) => {
+                                let trid = `tr${yindex}`
+                                return <tr key={trid}>
+                                    {i.map((u, xindex) => {
+                                        let coord = `${yindex}-${xindex}`;
+                                        return <Cell
+                                            key={coord}
+                                            pos={coord}
+                                            isLit={u}
+                                            flipCellsAroundMe={this.flipCellsAround}
+                                        />
+                                    })}
+                                </tr>
+                            })}
+                        </tbody>
+                    </table>
                 }
             </div>
         );
