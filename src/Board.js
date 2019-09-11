@@ -52,7 +52,7 @@ class Board extends Component {
             clicks: 0,
             hasWon: false
         };
-        this.handleCellClick = this.handleCellClick.bind(this);
+        //this.handleCellClick = this.handleCellClick.bind(this);
         this.flipCellsAround = this.flipCellsAround.bind(this);
         this.setBoard = this.setBoard.bind(this);
     }
